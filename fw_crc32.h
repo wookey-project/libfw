@@ -37,6 +37,6 @@
  *             chunk CRC32, or 0xffffffff for the first one
  */
 
-uint32_t crc32 (const unsigned char *buf, uint32_t len, uint32_t init)
+uint32_t crc32 (const unsigned char *buf, uint32_t len, uint32_t init);
 
 #endif/*!CRC32_H_*/

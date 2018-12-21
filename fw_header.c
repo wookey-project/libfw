@@ -21,6 +21,9 @@
  *
  */
 #include "fw_header.h"
+#include "api/print.h"
+#include "api/string.h"
+#include "api/regutils.h"
 
 void firmware_print_header(const firmware_header_t * header)
 {
@@ -48,12 +51,15 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
                           __out uint8_t           *sig)
 {
 	/* Some sanity checks */
-	if((buffer == NULL) || (header == NULL) || (sig == NULL)) {
+	if((buffer == NULL) || (header == NULL)) {
 		goto err;
 	}
 	if(len < sizeof(firmware_header_t)) {
 		goto err;
 	}
+
+
+    /* managing header structure */
 	/* Copy the header from the buffer */
 	memcpy(header, buffer, sizeof(firmware_header_t));
 	/* FIXME: define arch independent endianess management (to_device(xxx) instead of to_big/to_little */
@@ -61,17 +67,29 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
 	header->chunksize = to_big32(header->chunksize);
 	header->len       = to_big32(header->len);
 	header->magic     = to_big32(header->magic);
-	/* Get the signature length */
-	if(header->siglen > siglen) {
-		/* Not enough room to store the signature */
-		goto err;
-	}
-	if(len < sizeof(firmware_header_t)+header->siglen) {
-		/* The provided buffer is too small! */
-		goto err;
-	} 
-	/* Copy the signature */
-	memcpy(sig, buffer+sizeof(firmware_header_t), header->siglen);
+    if (sig != NULL) {
+        /* full header size */
+        if(len < sizeof(firmware_header_t)+header->siglen) {
+            /* The provided buffer is too small! */
+            goto err;
+        }
+    } else {
+        /* truncated header size, without signature */
+        if(len < sizeof(firmware_header_t)) {
+            /* The provided buffer is too small! */
+            goto err;
+        }
+    }
+
+    /* managing signature */
+    if (sig != NULL) {
+        if(header->siglen > siglen) {
+            /* Not enough room to store the signature */
+            goto err;
+        }
+        /* Copy the signature */
+        memcpy(sig, buffer+sizeof(firmware_header_t), header->siglen);
+    }
 
 	return 0;
 err:
