@@ -1,0 +1,26 @@
+config USR_LIB_FIRMWARE
+  bool  "userspace FIrmware manipulation library"
+  default y
+  select USR_DRV_FLASH
+  ---help---
+  Firmware utility library, manipulating firmware image,
+  checking cryptographic header, and abstracting their storage into
+  the device's storage backend
+config USR_LIB_FIRMWARE_CFLAGS
+  string
+  default " -I../../libs/firmware/api " if USR_LIB_FIRMWARE
+
+if USR_LIB_DFU
+
+menu "Firmware-Related Features"
+
+config USR_LIB_FIRWARE_SUPPORT_HW_HMAC
+  bool "Support for Hardware-accelerated HMAC"
+  default n
+  ---help---
+  Support for hardware HMAC IP to calculate the written firmware HMAC
+  for post-download integrity check.
+
+endmenu
+
+endif
