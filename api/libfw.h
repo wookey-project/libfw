@@ -87,19 +87,6 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
  */
 void firmware_print_header(const firmware_header_t * header);
 
-/*
- * @brief Linux-compatible CRC32 implementation
- *
- * Return the CRC32 of the current buffer
- * @param buf  the buffer on which the CRC32 is calculated
- * @param len  the buffer len
- * @param init when calculating CRC32 on successive chunk to get back
- *             the CRC32 of the whole input content, contains the previous
- *             chunk CRC32, or 0xffffffff for the first one
- */
-
-uint32_t crc32 (const unsigned char *buf, uint32_t len, uint32_t init);
-
 
 /*
  * Current mode detection. These functions return the current mode, based on the
@@ -113,5 +100,12 @@ bool is_in_flop_mode(void);
 bool is_in_fw_mode(void);
 
 bool is_in_dfu_mode(void);
+
+/*
+ * About initialization 
+ */
+uint8_t firmware_early_init(void);
+
+uint8_t firmware_init(void);
 
 #endif

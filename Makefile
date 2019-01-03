@@ -18,6 +18,7 @@ CFLAGS += -I$(PROJ_FILES)/include/generated -I$(PROJ_FILES) -I$(PROJ_FILES)/libs
 CFLAGS += -I$(PROJ_FILES)/libs/debug/api
 CFLAGS += -I$(PROJ_FILES)/libs/wookey # FIXME: scsi.c should not invoke IPC but callbacks instead
 CFLAGS += -I$(PROJ_FILES)/libs/std
+CFLAGS += $(APPS_CFLAGS)
 CFLAGS += -MMD -MP
 
 LDFLAGS += -fno-builtin -nostdlib -nostartfiles
