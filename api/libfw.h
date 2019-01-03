@@ -100,4 +100,18 @@ void firmware_print_header(const firmware_header_t * header);
 
 uint32_t crc32 (const unsigned char *buf, uint32_t len, uint32_t init);
 
-#endif/*!LIBFW_H_*/
+
+/*
+ * Current mode detection. These functions return the current mode, based on the
+ * linker scripts variables _is_flip, _is_flop, and so on. See application ldscript
+ * for more information.
+ */
+bool is_in_flip_mode(void);
+
+bool is_in_flop_mode(void);
+
+bool is_in_fw_mode(void);
+
+bool is_in_dfu_mode(void);
+
+#endif
