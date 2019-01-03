@@ -29,7 +29,7 @@ uint8_t fw_storage_early_init(void)
             .map_system = 0,
             .map_otp = 0,
             .map_opt_bank1 = 0,
-#if CONFIG_USR_DRV_LASH_DUAL_BANK
+#if CONFIG_USR_DRV_FLASH_DUAL_BANK
             .map_opt_bank2 = 1,
 #endif
         };
@@ -55,7 +55,7 @@ uint8_t fw_storage_early_init(void)
             .map_system = 0,
             .map_otp = 0,
             .map_opt_bank1 = 1,
-#if CONFIG_USR_DRV_LASH_DUAL_BANK
+#if CONFIG_USR_DRV_FLASH_DUAL_BANK
             .map_opt_bank2 = 0,
 #endif
         };
@@ -78,15 +78,36 @@ err:
 uint8_t fw_storage_init(void)
 {
     uint8_t ret;
-    int desc = flash_get_descriptor(FLOP);
-    ret = sys_cfg(CFG_DEV_MAP, desc);
-    if (ret != SYS_E_DONE) {
-        printf("enable to map flop device\n");
+    int desc;
+    if (is_in_flip_mode()) {
+        desc = flash_get_descriptor(FLOP);
+        ret = sys_cfg(CFG_DEV_MAP, desc);
+        if (ret != SYS_E_DONE) {
+            printf("enable to map flop device\n");
+        }
+        desc = flash_get_descriptor(OPT_BANK2);
+        ret = sys_cfg(CFG_DEV_MAP, desc);
+        if (ret != SYS_E_DONE) {
+            printf("enable to map flash-opt-bank2 device\n");
+        }
+    }
+    if (is_in_flop_mode()) {
+        desc = flash_get_descriptor(FLIP);
+        ret = sys_cfg(CFG_DEV_MAP, desc);
+        if (ret != SYS_E_DONE) {
+            printf("enable to map flip device\n");
+        }
+        desc = flash_get_descriptor(OPT_BANK1);
+        ret = sys_cfg(CFG_DEV_MAP, desc);
+        if (ret != SYS_E_DONE) {
+            printf("enable to map flash-opt-bank1 device\n");
+        }
     }
     desc = flash_get_descriptor(CTRL);
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
         printf("enable to map flash-ctrl device\n");
     }
+
     return 0;
 }
