@@ -108,4 +108,11 @@ uint8_t firmware_early_init(void);
 
 uint8_t firmware_init(void);
 
+/*
+ * Storage management
+ */
+uint8_t fw_storage_erase_bank(void);
+
+uint8_t fw_storage_write_buffer(physaddr_t dest, uint64_t *buffer, uint32_t size);
+
 #endif
