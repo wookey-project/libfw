@@ -171,12 +171,9 @@ uint8_t fw_storage_erase_bank(void)
     return 0;
 }
 
-/*
- * Here we consider we write *words*. This means that the size must be
- * 4bytes multiple. Size is still in bytes.
- */
-uint8_t fw_storage_write_buffer(physaddr_t dest, uint64_t *buffer, uint32_t size)
+uint8_t fw_storage_prepare_access(void)
 {
+
     uint8_t ret;
     int desc;
     uint8_t  desc_id = 0;
@@ -185,16 +182,109 @@ uint8_t fw_storage_write_buffer(physaddr_t dest, uint64_t *buffer, uint32_t size
     desc = flash_get_descriptor(CTRL);
 
 #if FW_STORAGE_DEBUG
-    printf("mappint flash-ctrl (desc: %d)\n", desc);
+    printf("mapping flash-ctrl (desc: %d)\n", desc);
 #endif
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
         printf("enable to map flash-ctrl device\n");
         return 1;
     }
-    
+
+    if (is_in_flip_mode()) {
+        desc_id = FLOP;
+
+    } else if (is_in_flop_mode()) {
+        desc_id = FLIP;
+    } else {
+        printf("neither in flip or flop mode !\n");
+        return 1;
+    }
+    /* mounting flash memory area */
+    desc = flash_get_descriptor(desc_id);
+#if FW_STORAGE_DEBUG
+    printf("mappint flash-ctrl (desc: %d)\n", desc);
+#endif
+
+    ret = sys_cfg(CFG_DEV_MAP, desc);
+    if (ret != SYS_E_DONE) {
+        printf("enable to map flash-ctrl device\n");
+        return 1;
+    }
+
     /* unlocking flash */
     flash_unlock();
+    return 0;
+}
+
+uint8_t fw_storage_finalize_access(void)
+{
+    uint8_t ret;
+    int desc = 0;
+    uint8_t  desc_id = 0;
+
+    if (is_in_flip_mode()) {
+        desc_id = FLOP;
+
+    } else if (is_in_flop_mode()) {
+        desc_id = FLIP;
+    } else {
+        printf("neither in flip or flop mode !\n");
+        return 1;
+    }
+
+    desc = flash_get_descriptor(desc_id);
+#if FW_STORAGE_DEBUG
+    printf("unmapping flash-area (desc: %d)\n", desc);
+#endif
+
+    ret = sys_cfg(CFG_DEV_UNMAP, desc);
+    if (ret != SYS_E_DONE) {
+        printf("enable to unmap flash memory device\n");
+        return 1;
+    }
+
+#if FW_STORAGE_DEBUG
+    printf("releasing flash memory (desc: %d)\n", desc);
+#endif
+    ret = sys_cfg(CFG_DEV_RELEASE, desc);
+    if (ret != SYS_E_DONE) {
+        printf("enable to release flash memory device\n");
+        return 1;
+    }
+    
+
+    /* lock flash CR */
+    flash_lock();
+    /* unmap flash-ctrl */
+    desc = flash_get_descriptor(CTRL);
+
+#if FW_STORAGE_DEBUG
+    printf("unmapping flash-ctrl (desc: %d)\n", desc);
+#endif
+    ret = sys_cfg(CFG_DEV_UNMAP, desc);
+    if (ret != SYS_E_DONE) {
+        printf("enable to unmap flash-ctrl device\n");
+        return 1;
+    }
+
+#if FW_STORAGE_DEBUG
+    printf("releasing flash-ctrl (desc: %d)\n", desc);
+#endif
+    ret = sys_cfg(CFG_DEV_RELEASE, desc);
+    if (ret != SYS_E_DONE) {
+        printf("enable to release flash-ctrl device\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
+ * Here we consider we write *words*. This means that the size must be
+ * 4bytes multiple. Size is still in bytes.
+ */
+uint8_t fw_storage_write_buffer(physaddr_t dest, uint32_t *buffer, uint32_t size)
+{
     if (is_in_flip_mode()) {
         /* sanitize */
         uint8_t sector = flash_select_sector(dest);
@@ -202,8 +292,6 @@ uint8_t fw_storage_write_buffer(physaddr_t dest, uint64_t *buffer, uint32_t size
             printf("destination not in the other bank !!!\n");
             return 1;
         }
-        desc_id = FLOP;
-
     } else if (is_in_flop_mode()) {
         /* sanitize */
         uint8_t sector = flash_select_sector(dest);
@@ -211,34 +299,21 @@ uint8_t fw_storage_write_buffer(physaddr_t dest, uint64_t *buffer, uint32_t size
             printf("destination not in the other bank !!!\n");
             return 1;
         }
-        desc_id = FLIP;
-
     } else {
         printf("neither in flip or flop mode !\n");
         return 1;
     }
 
-    /* writing to flash-flop */
-    desc = flash_get_descriptor(desc_id);
-
-#if FW_STORAGE_DEBUG
-    printf("mapping flash-area (desc: %d)\n", desc);
-#endif
-    ret = sys_cfg(CFG_DEV_MAP, desc);
-    if (ret != SYS_E_DONE) {
-        printf("enable to map flash-flop device\n");
-        return 1;
-    }
-    uint64_t *addr = (uint64_t *)dest;
-    uint64_t *offset = buffer;
+    uint32_t *addr = (uint32_t *)dest;
+    uint32_t *offset = buffer;
     uint32_t residue = 0;
-    uint32_t aligned_size = size - (size % 8);
-    if (size % 8) {
+    uint32_t aligned_size = size - (size % 4);
+    if (size % 4) {
         /* size is not word-aligned ! a residue is needed */
-        residue = size % 8;
+        residue = size % 4;
     }
-    for (uint32_t i = 0; i < (aligned_size / 8); ++i) {
-        flash_program_dword(addr, *offset);
+    for (uint32_t i = 0; i < (aligned_size / 4); ++i) {
+        flash_program_word(addr, *offset);
         addr++;
         offset++;
     }
@@ -255,30 +330,6 @@ uint8_t fw_storage_write_buffer(physaddr_t dest, uint64_t *buffer, uint32_t size
         }
     }
 
-#if FW_STORAGE_DEBUG
-    printf("unmapping flash-area (desc: %d)\n", desc);
-#endif
-
-    ret = sys_cfg(CFG_DEV_UNMAP, desc);
-    if (ret != SYS_E_DONE) {
-        printf("enable to unmap flash-flop device\n");
-        return 1;
-    }
-
-
-    /* lock flash CR */
-    flash_lock();
-    /* unmap flash-ctrl */
-    desc = flash_get_descriptor(CTRL);
-
-#if FW_STORAGE_DEBUG
-    printf("unmapping flash-ctrl (desc: %d)\n", desc);
-#endif
-    ret = sys_cfg(CFG_DEV_UNMAP, desc);
-    if (ret != SYS_E_DONE) {
-        printf("enable to unmap flash-ctrl device\n");
-        return 1;
-    }
 
     return 0;
 }
