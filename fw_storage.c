@@ -140,23 +140,29 @@ uint8_t fw_storage_erase_bank(void)
 
     if (is_in_flip_mode()) {
         /* erasing flop sectors */
+# if (CONFIG_USR_DRV_FLASH_1M && CONFIG_USR_DRV_FLASH_DUAL_BANK) || CONFIG_USR_DRV_FLASH_2M
         flash_sector_erase(FLASH_SECTOR_17);
         flash_sector_erase(FLASH_SECTOR_18);
         flash_sector_erase(FLASH_SECTOR_19);
+#endif
+# if CONFIG_USR_DRV_FLASH_2M
         flash_sector_erase(FLASH_SECTOR_20);
         flash_sector_erase(FLASH_SECTOR_21);
         flash_sector_erase(FLASH_SECTOR_22);
         flash_sector_erase(FLASH_SECTOR_23);
+#endif
     }
     if (is_in_flop_mode()) {
         /* erasing flop sectors */
         flash_sector_erase(FLASH_SECTOR_5);
         flash_sector_erase(FLASH_SECTOR_6);
         flash_sector_erase(FLASH_SECTOR_7);
+# if (CONFIG_USR_DRV_FLASH_1M && !CONFIG_USR_DRV_FLASH_DUAL_BANK) || CONFIG_USR_DRV_FLASH_2M
         flash_sector_erase(FLASH_SECTOR_8);
         flash_sector_erase(FLASH_SECTOR_9);
         flash_sector_erase(FLASH_SECTOR_10);
         flash_sector_erase(FLASH_SECTOR_11);
+#endif
     }
 
     /* lock flash CR */
