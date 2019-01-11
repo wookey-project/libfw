@@ -88,6 +88,11 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
 void firmware_print_header(const firmware_header_t * header);
 
 
+bool firmware_is_partition_flip(__in const firmware_header_t *header);
+
+bool firmware_is_partition_flop(__in const firmware_header_t *header);
+
+
 /*
  * Current mode detection. These functions return the current mode, based on the
  * linker scripts variables _is_flip, _is_flop, and so on. See application ldscript

@@ -95,3 +95,36 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
 err:
 	return -1;
 }
+
+bool firmware_is_partition_flip(__in const firmware_header_t *header)
+{
+	if(header == NULL){
+		goto err;
+	}
+	if(header->type == FLIP){
+		return true;
+	}
+	else{
+		return false;
+	}
+
+err:
+	return false;
+}
+
+bool firmware_is_partition_flop(__in const firmware_header_t *header)
+{
+	if(header == NULL){
+		goto err;
+	}
+	if(header->type == FLOP){
+		return true;
+	}
+	else{
+		return false;
+	}
+
+err:
+	return false;
+}
+
