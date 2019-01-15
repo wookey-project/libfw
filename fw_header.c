@@ -67,6 +67,8 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
 	header->chunksize = to_big32(header->chunksize);
 	header->len       = to_big32(header->len);
 	header->magic     = to_big32(header->magic);
+	header->type      = to_big32(header->type);
+	header->version   = to_big32(header->version);
     if (sig != NULL) {
         /* full header size */
         if(len < sizeof(firmware_header_t)+header->siglen) {
@@ -90,6 +92,37 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
         /* Copy the signature */
         memcpy(sig, buffer+sizeof(firmware_header_t), header->siglen);
     }
+
+	return 0;
+err:
+	return -1;
+}
+
+int firmware_header_to_raw(__in const firmware_header_t *header,
+			   __out  uint8_t     *buffer,
+                           __out  const uint32_t     len)
+{
+	/* Some sanity checks */
+	if((buffer == NULL) || (header == NULL)) {
+		goto err;
+	}
+	if(len < sizeof(firmware_header_t)) {
+		goto err;
+	}
+
+	/* Now copy the fields with reversed endianness */
+	memcpy(buffer, header, sizeof(firmware_header_t));
+	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	buffer += 4;
+	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	buffer += 4;
+	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	buffer += 4;
+	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	buffer += 4;
+	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	buffer += 4;
+	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
 
 	return 0;
 err:

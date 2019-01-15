@@ -82,6 +82,11 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
                           __in  const uint32_t     siglen,
                           __out firmware_header_t *header,
                           __out uint8_t           *sig);
+
+int firmware_header_to_raw(__in const firmware_header_t *header,
+                           __out  uint8_t     *buffer,
+                           __out  const uint32_t     len);
+
 /**
  *
  */
