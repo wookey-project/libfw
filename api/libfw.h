@@ -97,7 +97,6 @@ bool firmware_is_partition_flip(__in const firmware_header_t *header);
 
 bool firmware_is_partition_flop(__in const firmware_header_t *header);
 
-
 /*
  * Current mode detection. These functions return the current mode, based on the
  * linker scripts variables _is_flip, _is_flop, and so on. See application ldscript
@@ -110,6 +109,17 @@ bool is_in_flop_mode(void);
 bool is_in_fw_mode(void);
 
 bool is_in_dfu_mode(void);
+
+/* Get the FLIP and FLOP base addresses */
+uint32_t firmware_get_flip_base_addr(void);
+
+uint32_t firmware_get_flop_base_addr(void);
+
+/* Get the FLIP and FLOP sizes */
+uint32_t firmware_get_flip_size(void);
+
+uint32_t firmware_get_flop_size(void);
+
 
 /*
  * About initialization 
