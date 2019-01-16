@@ -26,8 +26,8 @@
 #include "api/libfw.h"
 
 typedef enum {
-	FLIP = 0,
-	FLOP = 1,
+	PART_FLIP = 0,
+	PART_FLOP = 1,
 } partitions_types;
 
 #endif

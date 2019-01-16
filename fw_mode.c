@@ -1,4 +1,5 @@
 #include "api/libfw.h"
+#include "fw_mode.h"
 
 #include "api/types.h"
 #include "api/print.h"
@@ -56,11 +57,6 @@ bool is_in_dfu_mode(void)
     }
     return false;
 }
-
-/* FIXME: these valies should be read from the layout preprocessing */
-#define FLASH_FLOP_ADDR 0x08120000
-#define FLASH_FLIP_ADDR 0x08020000
-#define FLASH_SIZE 0xe0000 // fw+dfu size (without SHR & bootloader)
 
 uint32_t firmware_get_flip_base_addr(void)
 {

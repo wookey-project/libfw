@@ -35,7 +35,7 @@ void firmware_print_header(const firmware_header_t * header)
 	printf("\nVERSION = %x", header->version);
 	printf("\nLEN = %x", header->len);
 	printf("\nSIGLEN = %x", header->siglen);
-	printf("\nCHUNKSIZE = %x", header->chunksize);	
+	printf("\nCHUNKSIZE = %x", header->chunksize);
 	printf("\nIV = ");
 	hexdump((unsigned char*)&(header->iv), 16);
 	printf("\nHMAC = ");
@@ -134,7 +134,7 @@ bool firmware_is_partition_flip(__in const firmware_header_t *header)
 	if(header == NULL){
 		goto err;
 	}
-	if(header->type == FLIP){
+	if(header->type == PART_FLIP){
 		return true;
 	}
 	else{

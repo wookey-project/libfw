@@ -23,8 +23,11 @@
 #ifndef LIBFW_H_
 #define LIBFW_H_
 
+#include "autoconf.h"
 #include "api/types.h"
+#include "libflash.h"
 
+#define LIBFW_DEBUG 0
 /***********************************************************
  * basic check and signature functions
  **********************************************************/
@@ -122,9 +125,9 @@ uint32_t firmware_get_flop_size(void);
 
 
 /*
- * About initialization 
+ * About initialization
  */
-uint8_t firmware_early_init(void);
+uint8_t firmware_early_init(t_device_mapping *devmap);
 
 uint8_t firmware_init(void);
 
@@ -138,5 +141,28 @@ uint8_t fw_storage_prepare_access(void);
 uint8_t fw_storage_write_buffer(physaddr_t dest, uint32_t *buffer, uint32_t size);
 
 uint8_t fw_storage_finalize_access(void);
+
+uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig);
+
+uint8_t clear_other_header(void);
+
+/*
+ * About firmware versioning
+ */
+
+typedef enum {
+    FW_VERSION_FIELD_EPOCH,
+    FW_VERSION_FIELD_MAJOR,
+    FW_VERSION_FIELD_MIDDLE,
+    FW_VERSION_FIELD_MINOR,
+    FW_VERSION_FIELD_UPDATE,
+    FW_VERSION_FIELD_ALL,
+} firmware_version_field_t;
+
+uint32_t fw_get_current_version(firmware_version_field_t field);
+
+bool fw_is_rollback(firmware_header_t *header);
+
+int fw_version_compare(uint32_t version1, uint32_t version2);
 
 #endif
