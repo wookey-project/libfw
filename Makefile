@@ -12,14 +12,11 @@ VERSION = 1
 # use an app-specific build dir
 APP_BUILD_DIR = $(BUILD_DIR)/libs/$(LIB_NAME)
 
+CFLAGS += $(LIBS_CFLAGS)
 CFLAGS += -ffreestanding
 CFLAGS += $(DRIVERS_CFLAGS)
 CFLAGS += -I$(PROJ_FILES)/include/generated -I$(PROJ_FILES) -I$(PROJ_FILES)/libs/std -I$(PROJ_FILES)/kernel/shared -I.
-CFLAGS += -I$(PROJ_FILES)/libs/debug/api
-CFLAGS += -I$(PROJ_FILES)/libs/wookey # FIXME: scsi.c should not invoke IPC but callbacks instead
-CFLAGS += -I$(PROJ_FILES)/libs/std
-CFLAGS += $(APPS_CFLAGS)
-CFLAGS += -MMD -MP
+CFLAGS += -MMD -MP -Os
 
 LDFLAGS += -fno-builtin -nostdlib -nostartfiles
 LD_LIBS += -lg
