@@ -14,11 +14,17 @@
 /* clear the target DFU header (flip when in flop mode, flop when in flip mode */
 uint8_t clear_other_header(void)
 {
-    shr_vars_t *shr_header = (shr_vars_t*)FLASH_SHR_ADDR;
     uint8_t ret;
     int desc;
     t_firmware_state * fw = 0;
     uint8_t ok = 0;
+    shr_vars_t *shr_header = 0;
+    if (is_in_flip_mode()) {
+        shr_header = (shr_vars_t*)FLASH_FLOP_SHR_ADDR;
+    }
+    if (is_in_flop_mode()) {
+        shr_header = (shr_vars_t*)FLASH_FLIP_SHR_ADDR;
+    }
 
     desc = flash_get_descriptor(CTRL2);
     ret = sys_cfg(CFG_DEV_MAP, desc);
@@ -28,7 +34,12 @@ uint8_t clear_other_header(void)
         goto initial_err;
     }
 
-    desc = flash_get_descriptor(FLIP_SHR);
+    if (is_in_flip_mode()) {
+        desc = flash_get_descriptor(FLOP_SHR);
+    }
+    if (is_in_flop_mode()) {
+        desc = flash_get_descriptor(FLIP_SHR);
+    }
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
         printf("unable to map flip-shr device, rollback\n");
@@ -46,30 +57,35 @@ uint8_t clear_other_header(void)
 
     flash_unlock();
 
+    fw = &(shr_header->fw);
     /* flip and flop are *not* on the same sector */
     if (is_in_flip_mode()) {
-        fw = &(shr_header->flop);
 #if LIBFW_DEBUG
-        printf("clearing FLOP header at @ %x\n", &shr_header->flop);
+        printf("clearing FLOP header at @ %x\n", &shr_header->fw);
 #endif
-        fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)buff, sizeof(shr_vars_t));
     }
     if (is_in_flop_mode()) {
-        fw = &(shr_header->flip);
 #if LIBFW_DEBUG
-        printf("clearing FLIP header at @ %x\n", &shr_header->flip);
+        printf("clearing FLIP header at @ %x\n", &shr_header->fw);
 #endif
-        fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)buff, sizeof(shr_vars_t));
     }
+    fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)buff, sizeof(shr_vars_t));
 
     flash_lock();
 
-    desc = flash_get_descriptor(FLIP_SHR);
+    if (is_in_flip_mode()) {
+        desc = flash_get_descriptor(FLOP_SHR);
+    }
+    if (is_in_flop_mode()) {
+        desc = flash_get_descriptor(FLIP_SHR);
+    }
+
     ret = sys_cfg(CFG_DEV_UNMAP, desc);
     if (ret != SYS_E_DONE) {
         printf("unable to map flip-shr device\n");
         return 1;
     }
+
 middle_err:
 
     desc = flash_get_descriptor(CTRL2);
@@ -87,8 +103,16 @@ uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig)
 {
     uint8_t ret;
     int desc;
-    shr_vars_t *shr_header = (shr_vars_t*)FLASH_SHR_ADDR;
     t_firmware_state * fw = 0;
+    uint8_t ok = 0;
+    shr_vars_t *shr_header = 0;
+    if (is_in_flip_mode()) {
+        shr_header = (shr_vars_t*)FLASH_FLOP_SHR_ADDR;
+    }
+    if (is_in_flop_mode()) {
+        shr_header = (shr_vars_t*)FLASH_FLIP_SHR_ADDR;
+    }
+
 
     /*unmap hash if mapped */
     hash_unmap();
@@ -97,27 +121,28 @@ uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig)
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
         printf("unable to map flash-ctrl device\n");
-        return 1;
+        ok = 1;
+        goto initial_err;
     }
-    desc = flash_get_descriptor(FLIP_SHR);
+    if (is_in_flip_mode()) {
+        desc = flash_get_descriptor(FLOP_SHR);
+    }
+    if (is_in_flop_mode()) {
+        desc = flash_get_descriptor(FLIP_SHR);
+    }
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
         printf("unable to map flip-shr device\n");
-        return 1;
+        ok = 1;
+        goto middle_err;
     }
 
-
-
-    if (is_in_flip_mode()) {
-        fw = &(shr_header->flop);
-    }
-    if (is_in_flop_mode()) {
-        fw = &(shr_header->flip);
-    }
+    fw = &(shr_header->fw);
 
     if (!fw) {
         printf("Error! unable to detect fw mode !\n");
-        return 1;
+        ok = 1;
+        goto final_err;
     }
     uint32_t crc;
     t_firmware_state tmp_fw = { 0 };
@@ -140,19 +165,33 @@ uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig)
     tmp_fw.bootable = FW_BOOTABLE;
     fw_storage_write_buffer((physaddr_t)&(fw->bootable), (uint32_t*)&(tmp_fw.bootable), sizeof(uint32_t));
 
+
+    /* unmapping and rollback management */
+final_err:
+
+    if (is_in_flip_mode()) {
+        desc = flash_get_descriptor(FLOP_SHR);
+    }
+    if (is_in_flop_mode()) {
+        desc = flash_get_descriptor(FLIP_SHR);
+    }
+
+    ret = sys_cfg(CFG_DEV_UNMAP, desc);
+    if (ret != SYS_E_DONE) {
+        printf("unable to map flip-shr device\n");
+        return ok;
+    }
+
+middle_err:
+
     desc = flash_get_descriptor(CTRL2);
     ret = sys_cfg(CFG_DEV_UNMAP, desc);
     if (ret != SYS_E_DONE) {
         printf("unable to map flash-ctrl device\n");
-        return 1;
-    }
-    desc = flash_get_descriptor(FLIP_SHR);
-    ret = sys_cfg(CFG_DEV_UNMAP, desc);
-    if (ret != SYS_E_DONE) {
-        printf("unable to map flip-shr device\n");
-        return 1;
+        return ok;
     }
 
+initial_err:
 
-    return 0;
+    return ok;
 }

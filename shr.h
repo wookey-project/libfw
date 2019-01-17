@@ -23,8 +23,8 @@
 #ifndef _SHARED_H
 #define _SHARED_H
 
-#include "api/types.h"
 #include "autoconf.h"
+#include "api/types.h"
 
 #define MAX_SIG_LEN 64 /* 512bit sig len */
 
@@ -63,10 +63,7 @@ typedef struct __packed {
 } t_firmware_state;
 
 typedef struct __packed {
-        t_firmware_state flip;
-        uint8_t vfill_flip[SHR_SECTOR_SIZE - sizeof(t_firmware_state)];
-        t_firmware_state flop;
-        uint8_t vfill_flop[SHR_SECTOR_SIZE - sizeof(t_firmware_state)];
+        t_firmware_state fw;
 } shr_vars_t;
 
 #endif

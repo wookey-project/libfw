@@ -59,72 +59,74 @@ int fw_version_compare(uint32_t version1, uint32_t version2)
 uint32_t fw_get_current_version(firmware_version_field_t field)
 {
     uint8_t ret;
-    int desc;
+    int desc = 0;
     t_firmware_state * fw = 0;
     uint32_t field_value = 0;
-    shr_vars_t *shr_header = (shr_vars_t*)FLASH_SHR_ADDR;
-
-#ifdef CONFIG_WOOKEY
-    if (!flash_is_device_registered(FLIP_SHR)) {
-#else
-    if (!flash_is_device_registered(BANK1)) {
-#endif
-        /* mapping device */
-#ifdef CONFIG_WOOKEY
-        desc = flash_get_descriptor(FLIP_SHR);
-#else
-        desc = flash_get_descriptor(BANK1);
-#endif
-        ret = sys_cfg(CFG_DEV_MAP, desc);
-        if (ret != SYS_E_DONE) {
-            printf("enable to map flash device\n");
-            return 0;
-        }
-
-        if (is_in_flip_mode()) {
-            fw = &(shr_header->flip);
-        }
-        if (is_in_flop_mode()) {
-            fw = &(shr_header->flop);
-        }
-
-        /* get back current fw info (read only) - no flash unlock */
-        uint32_t version = fw->version;
-
-        /* unmap device */
-        ret = sys_cfg(CFG_DEV_UNMAP, desc);
-        if (ret != SYS_E_DONE) {
-            printf("enable to map flash device\n");
-            return 0;
-        }
-
-        /*return the field */
-        switch (field) {
-            case FW_VERSION_FIELD_EPOCH:
-                field_value = (version & VERSION_EPOCH_Msk) >> VERSION_EPOCH_Pos;
-                break;
-            case FW_VERSION_FIELD_MAJOR:
-                field_value = (version & VERSION_MAJOR_Msk) >> VERSION_MAJOR_Pos;
-                break;
-            case FW_VERSION_FIELD_MIDDLE:
-                field_value = (version & VERSION_MIDDLE_Msk) >> VERSION_MIDDLE_Pos;
-                break;
-            case FW_VERSION_FIELD_MINOR:
-                field_value = (version & VERSION_MINOR_Msk) >> VERSION_MINOR_Pos;
-                break;
-            case FW_VERSION_FIELD_UPDATE:
-                field_value = (version & VERSION_UPDATE_Msk) >> VERSION_UPDATE_Pos;
-                break;
-            case FW_VERSION_FIELD_ALL:
-                field_value = version;
-                break;
-            default:
-                printf("invalid field type!\n");
-                break;
-        }
-    } else {
-        printf("unable to map headers\n");
+    shr_vars_t *shr_header;
+    if (is_in_flip_mode()) {
+        shr_header = (shr_vars_t*)FLASH_FLIP_SHR_ADDR;
     }
+    if (is_in_flop_mode()) {
+        shr_header = (shr_vars_t*)FLASH_FLOP_SHR_ADDR;
+    }
+
+
+#ifdef CONFIG_WOOKEY
+    /* mapping device */
+    if (is_in_flip_mode()) {
+        desc = flash_get_descriptor(FLIP_SHR);
+    }
+    if (is_in_flop_mode()) {
+        desc = flash_get_descriptor(FLOP_SHR);
+    }
+    ret = sys_cfg(CFG_DEV_MAP, desc);
+    if (ret != SYS_E_DONE) {
+        printf("enable to map flash device\n");
+        return 0;
+    }
+
+    if (is_in_flip_mode()) {
+        fw = &(shr_header->fw);
+    }
+    if (is_in_flop_mode()) {
+        fw = &(shr_header->fw);
+    }
+
+    /* get back current fw info (read only) - no flash unlock */
+    uint32_t version = fw->version;
+
+    /* unmap device */
+    ret = sys_cfg(CFG_DEV_UNMAP, desc);
+    if (ret != SYS_E_DONE) {
+        printf("enable to map flash device\n");
+        return 0;
+    }
+
+    /*return the field */
+    switch (field) {
+        case FW_VERSION_FIELD_EPOCH:
+            field_value = (version & VERSION_EPOCH_Msk) >> VERSION_EPOCH_Pos;
+            break;
+        case FW_VERSION_FIELD_MAJOR:
+            field_value = (version & VERSION_MAJOR_Msk) >> VERSION_MAJOR_Pos;
+            break;
+        case FW_VERSION_FIELD_MIDDLE:
+            field_value = (version & VERSION_MIDDLE_Msk) >> VERSION_MIDDLE_Pos;
+            break;
+        case FW_VERSION_FIELD_MINOR:
+            field_value = (version & VERSION_MINOR_Msk) >> VERSION_MINOR_Pos;
+            break;
+        case FW_VERSION_FIELD_UPDATE:
+            field_value = (version & VERSION_UPDATE_Msk) >> VERSION_UPDATE_Pos;
+            break;
+        case FW_VERSION_FIELD_ALL:
+            field_value = version;
+            break;
+        default:
+            printf("invalid field type!\n");
+            break;
+    }
+#endif
     return field_value;
 
 }
