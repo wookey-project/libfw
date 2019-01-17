@@ -18,18 +18,22 @@ uint8_t clear_other_header(void)
     uint8_t ret;
     int desc;
     t_firmware_state * fw = 0;
+    uint8_t ok = 0;
 
     desc = flash_get_descriptor(CTRL2);
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
         printf("unable to map flash-ctrl device\n");
-        return 1;
+        ok = 1;
+        goto initial_err;
     }
+
     desc = flash_get_descriptor(FLIP_SHR);
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
-        printf("unable to map flip-shr device\n");
-        return 1;
+        printf("unable to map flip-shr device, rollback\n");
+        ok = 1;
+        goto middle_err;
     }
 
 
@@ -60,20 +64,23 @@ uint8_t clear_other_header(void)
 
     flash_lock();
 
-    desc = flash_get_descriptor(CTRL2);
-    ret = sys_cfg(CFG_DEV_UNMAP, desc);
-    if (ret != SYS_E_DONE) {
-        printf("unable to map flash-ctrl device\n");
-        return 1;
-    }
     desc = flash_get_descriptor(FLIP_SHR);
     ret = sys_cfg(CFG_DEV_UNMAP, desc);
     if (ret != SYS_E_DONE) {
         printf("unable to map flip-shr device\n");
         return 1;
     }
+middle_err:
 
-    return 0;
+    desc = flash_get_descriptor(CTRL2);
+    ret = sys_cfg(CFG_DEV_UNMAP, desc);
+    if (ret != SYS_E_DONE) {
+        printf("unable to map flash-ctrl device\n");
+        return 1;
+    }
+
+initial_err:
+    return ok;
 }
 
 uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig)
