@@ -154,16 +154,17 @@ uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig)
     memcpy((void*)tmp_fw.sig, sig, tmp_fw.siglen);
     tmp_fw.bootable = FW_BOOTABLE;
 
+    flash_unlock();
+
     /* set the header CRC32 */
     crc = crc32((uint8_t*)&tmp_fw, sizeof(t_firmware_state) - sizeof(uint32_t), 0xffffffff);
     tmp_fw.crc32 = crc;
-    /* writing the structure, without the boot flag */
-    tmp_fw.bootable = FW_NOT_BOOTABLE;
-
-    fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)&tmp_fw, sizeof(t_firmware_state));
     /* finishing with boot flag (atomic) */
     tmp_fw.bootable = FW_BOOTABLE;
-    fw_storage_write_buffer((physaddr_t)&(fw->bootable), (uint32_t*)&(tmp_fw.bootable), sizeof(uint32_t));
+
+    fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)&tmp_fw, sizeof(t_firmware_state));
+
+    flash_lock();
 
 
     /* unmapping and rollback management */
