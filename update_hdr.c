@@ -160,12 +160,11 @@ uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig)
     crc = crc32((uint8_t*)&tmp_fw, sizeof(t_firmware_state) - sizeof(uint32_t), 0xffffffff);
     tmp_fw.crc32 = crc;
     /* finishing with boot flag (atomic) */
-    tmp_fw.bootable = FW_BOOTABLE;
 
+    printf("writing header :@%x\n", fw);
     fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)&tmp_fw, sizeof(t_firmware_state));
 
     flash_lock();
-
 
     /* unmapping and rollback management */
 final_err:

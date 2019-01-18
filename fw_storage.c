@@ -206,16 +206,17 @@ uint8_t fw_storage_finalize_access(void)
  */
 uint8_t fw_storage_write_buffer(physaddr_t dest, uint32_t *buffer, uint32_t size)
 {
+    uint8_t sector;
     if (is_in_flip_mode()) {
         /* sanitize */
-        uint8_t sector = flash_select_sector(dest);
+        sector = flash_select_sector(dest);
         if (sector < 11) {
             printf("destination not in the other bank !!!\n");
             return 1;
         }
     } else if (is_in_flop_mode()) {
         /* sanitize */
-        uint8_t sector = flash_select_sector(dest);
+        sector = flash_select_sector(dest);
         if (sector > 12) {
             printf("destination not in the other bank !!!\n");
             return 1;
@@ -254,3 +255,5 @@ uint8_t fw_storage_write_buffer(physaddr_t dest, uint32_t *buffer, uint32_t size
 
     return 0;
 }
+
+
