@@ -12,38 +12,37 @@
  * The firmware version is structured on a uint32_t typed field.
  * It uses the following structure:
  *
- * 31     28         21         14          7            0
- * ------------------------------------------------------
- * |Epoch |  Major   | Middle   |   Minor   |   Update   |
- * ------------------------------------------------------
+ *       31         24        16           8            0
+ *       -----------------------------------------------
+ *       |  Major   | Middle   | patchset  |  devstage  |
+ *       -----------------------------------------------
  *
- *  Update, minor, middle and major fields are unsigned integer values,
- *  up to 127.
- *  Epoch is an unsigned value up to 7.
+ *  - sub (alpha, beta) for pre-release.
+ *  final release of a given version should have its 'sub' value set
+ *  with 0xff
+ *  - patchset for patch management (security or functionality patchs, no evolution
+ *  - Middle for minor evolution, compatible with previous releases of the same major
+ *    version.
+ *  - Major for major update, which may break compatibility with previous releases.
+ *    The way the device is managed varies and the device content may be lost between
+ *    major updates.
  *
- *  Using epoch allows to change the versioning if needed but is
- *  not required and can be leaved to 0 (default epoch).
+ * Each field can go up to 255.
+ * The version comparison is made using a direct uint32_t comparison.
  *
- *  As fields are encoded from the less impacting (update) to the
- *  more impacting (epoch) one, it is possible to compare the
- *  versions using the uint32_t types.
- *  Yet each field can be read separatly if needed
  */
 
-#define VERSION_EPOCH_Pos 28
-#define VERSION_EPOCH_Msk 0x3 << VERSION_EPOCH_Pos
+#define VERSION_MAJOR_Pos 24
+#define VERSION_MAJOR_Msk 0xff << VERSION_MAJOR_Pos
 
-#define VERSION_MAJOR_Pos 21
-#define VERSION_MAJOR_Msk 0x7f << VERSION_MAJOR_Pos
+#define VERSION_MIDDLE_Pos 16
+#define VERSION_MIDDLE_Msk 0xff << VERSION_MIDDLE_Pos
 
-#define VERSION_MIDDLE_Pos 14
-#define VERSION_MIDDLE_Msk 0x7f << VERSION_MIDDLE_Pos
+#define VERSION_PATCH_Pos 8
+#define VERSION_PATCH_Msk 0xff << VERSION_PATCH_Pos
 
-#define VERSION_MINOR_Pos 7
-#define VERSION_MINOR_Msk 0x7f << VERSION_MINOR_Pos
-
-#define VERSION_UPDATE_Pos 0
-#define VERSION_UPDATE_Msk 0x7f << VERSION_MINOR_Pos
+#define VERSION_DEV_Pos 0
+#define VERSION_DEV_Msk 0xff << VERSION_DEV_Pos
 
 int fw_version_compare(uint32_t version1, uint32_t version2)
 {
@@ -104,20 +103,17 @@ uint32_t fw_get_current_version(firmware_version_field_t field)
 
     /*return the field */
     switch (field) {
-        case FW_VERSION_FIELD_EPOCH:
-            field_value = (version & VERSION_EPOCH_Msk) >> VERSION_EPOCH_Pos;
-            break;
         case FW_VERSION_FIELD_MAJOR:
             field_value = (version & VERSION_MAJOR_Msk) >> VERSION_MAJOR_Pos;
             break;
         case FW_VERSION_FIELD_MIDDLE:
             field_value = (version & VERSION_MIDDLE_Msk) >> VERSION_MIDDLE_Pos;
             break;
-        case FW_VERSION_FIELD_MINOR:
-            field_value = (version & VERSION_MINOR_Msk) >> VERSION_MINOR_Pos;
+        case FW_VERSION_FIELD_PATCH:
+            field_value = (version & VERSION_PATCH_Msk) >> VERSION_PATCH_Pos;
             break;
-        case FW_VERSION_FIELD_UPDATE:
-            field_value = (version & VERSION_UPDATE_Msk) >> VERSION_UPDATE_Pos;
+        case FW_VERSION_FIELD_DEV:
+            field_value = (version & VERSION_DEV_Msk) >> VERSION_DEV_Pos;
             break;
         case FW_VERSION_FIELD_ALL:
             field_value = version;
@@ -135,13 +131,12 @@ uint32_t fw_get_current_version(firmware_version_field_t field)
 bool fw_is_rollback(firmware_header_t *header)
 {
     uint32_t current_version = fw_get_current_version(FW_VERSION_FIELD_ALL);
-    /* we consider that a rollback means that the new version is strictly
-     * smaller than the current one. Equal versions don't generate rollback
-     * alert */
-    if (fw_version_compare(current_version, header->version) < 0) {
+     /* we consider that a rollback means that the new version is
+     * smaller or equel to the current one.
+     * Equal versions generate rollback alert */
+    if (fw_version_compare(current_version, header->version) <= 0) {
         return true;
     }
     return false;
 }
-
 

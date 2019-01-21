@@ -151,11 +151,10 @@ uint8_t clear_other_header(void);
  */
 
 typedef enum {
-    FW_VERSION_FIELD_EPOCH,
     FW_VERSION_FIELD_MAJOR,
     FW_VERSION_FIELD_MIDDLE,
-    FW_VERSION_FIELD_MINOR,
-    FW_VERSION_FIELD_UPDATE,
+    FW_VERSION_FIELD_PATCH,
+    FW_VERSION_FIELD_DEV,
     FW_VERSION_FIELD_ALL,
 } firmware_version_field_t;
 
