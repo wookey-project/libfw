@@ -145,24 +145,42 @@ uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig)
         goto final_err;
     }
     uint32_t crc;
-    t_firmware_state tmp_fw = { 0 };
+    t_firmware_signature tmp_fw = { 0 };
+    uint32_t bootable = FW_BOOTABLE;
 
     /* TODO: fw should be written in 2 times (in RAM, to set the CRC32, and
      * written to flash in atomic mode */
+    tmp_fw.magic = dfu_header->magic;
     tmp_fw.version = dfu_header->version;
     tmp_fw.siglen = dfu_header->siglen;
+    tmp_fw.chunksize = dfu_header->chunksize;
     memcpy((void*)tmp_fw.sig, sig, tmp_fw.siglen);
-    tmp_fw.bootable = FW_BOOTABLE;
+    //tmp_fw.bootable = FW_BOOTABLE;
 
+    /* CRC32 field is not checked for CRC32. We use it as tmp buf to calculate
+     * the CRC32 of the overall SHR sectors (2 sectors) which must contain, at
+     * boot, only 0xfffff out of the signature header, as these sectors
+     * have been erased */
+    tmp_fw.crc32 = 0xffffffff;
     flash_unlock();
 
-    /* set the header CRC32 */
-    crc = crc32((uint8_t*)&tmp_fw, sizeof(t_firmware_state) - sizeof(uint32_t), 0xffffffff);
+    /* set the signature header CRC32 (withtout the CRC32 field) */
+    crc = crc32((uint8_t*)&tmp_fw, sizeof(t_firmware_signature) - sizeof(uint32_t), 0xffffffff);
+    /* update the crc32 with the sector padding (should contain 0xffffffff */
+    for (uint32_t i = 0; i < (SHR_SECTOR_SIZE - sizeof(t_firmware_signature)) / 4; ++i) {
+        crc = crc32((uint8_t*)&tmp_fw.crc32, sizeof(uint32_t), crc);
+    }
     tmp_fw.crc32 = crc;
-    /* finishing with boot flag (atomic) */
+    /* finishing with boot flag crc32 */
+    crc = crc32((uint8_t*)&bootable, sizeof(uint32_t), crc);
 
-    printf("writing header :@%x\n", fw);
-    fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)&tmp_fw, sizeof(t_firmware_state));
+    /* update the crc3 field with the calculated CRC */
+    tmp_fw.crc32 = crc;
+
+    printf("writing header singature :@%x\n", fw);
+    fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)&tmp_fw, sizeof(t_firmware_signature));
+    printf("writing header bootflag :@%x\n", &fw->bootable);
+    fw_storage_write_buffer((physaddr_t)&fw->bootable, (uint32_t*)&bootable, sizeof(uint32_t));
 
     flash_lock();
 

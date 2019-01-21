@@ -93,7 +93,7 @@ uint32_t fw_get_current_version(firmware_version_field_t field)
     }
 
     /* get back current fw info (read only) - no flash unlock */
-    uint32_t version = fw->version;
+    uint32_t version = fw->fw_sig.version;
 
     /* unmap device */
     ret = sys_cfg(CFG_DEV_UNMAP, desc);
