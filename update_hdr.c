@@ -165,20 +165,30 @@ uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, c
      * boot, only 0xfffff out of the signature header, as these sectors
      * have been erased */
     tmp_fw.crc32 = 0xffffffff;
-    flash_unlock();
 
-    /* set the signature header CRC32 (withtout the CRC32 field) */
-    crc = crc32((uint8_t*)&tmp_fw, sizeof(t_firmware_signature) - sizeof(uint32_t), 0xffffffff);
-    /* update the crc32 with the sector padding (should contain 0xffffffff */
-    for (uint32_t i = 0; i < (SHR_SECTOR_SIZE - sizeof(t_firmware_signature)) / 4; ++i) {
-        crc = crc32((uint8_t*)&tmp_fw.crc32, sizeof(uint32_t), crc);
+    /* set the signature header CRC32 (with the CRC32 field set at 0xffffffff) */
+    crc = crc32((uint8_t*)&tmp_fw, sizeof(t_firmware_signature) - SHA256_DIGEST_SIZE - EC_STRUCTURED_SIG_EXPORT_SIZE(EC_MAX_SIGLEN), 0xffffffff);
+
+    crc = crc32((uint8_t*)tmp_fw.hash, SHA256_DIGEST_SIZE, crc);
+    /* signature is not a part of the CRC, we use 0xff...ff instead */
+    for (uint32_t i = 0; i <  EC_STRUCTURED_SIG_EXPORT_SIZE(EC_MAX_SIGLEN); ++i) {
+        crc = crc32((uint8_t*)&tmp_fw.crc32, sizeof(uint8_t), crc);
     }
-    tmp_fw.crc32 = crc;
+    /* equivalent to calculcating CRC32 of 0xffff of 'fill' field of the header */
+    for (uint32_t i = 0; i < (SHR_SECTOR_SIZE - sizeof(t_firmware_signature)); ++i) {
+        crc = crc32((uint8_t*)&tmp_fw.crc32, sizeof(uint8_t), crc);
+    }
     /* finishing with boot flag crc32 */
     crc = crc32((uint8_t*)&bootable, sizeof(uint32_t), crc);
-
-    /* update the crc3 field with the calculated CRC */
+    /* and the vfill residue of the 2nd sector (using crc32 as temp buffer
+     * containing 0xffffffff content */
+    for (uint32_t i = 0; i < (SHR_SECTOR_SIZE - sizeof(uint32_t)) / 4; ++i) {
+        crc = crc32((uint8_t*)&tmp_fw.crc32, sizeof(uint32_t), crc);
+    }
+    /* update the crc32 field with the calculated CRC */
     tmp_fw.crc32 = crc;
+
+    flash_unlock();
 
     printf("writing header singature :@%x\n", fw);
     fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)&tmp_fw, sizeof(t_firmware_signature));
