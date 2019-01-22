@@ -145,7 +145,7 @@ uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, c
         goto final_err;
     }
     uint32_t crc;
-    t_firmware_signature tmp_fw = { 0 };
+    t_firmware_signature tmp_fw = { 0xff };
     uint32_t bootable = FW_BOOTABLE;
 
     /* TODO: fw should be written in 2 times (in RAM, to set the CRC32, and
@@ -182,8 +182,8 @@ uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, c
     crc = crc32((uint8_t*)&bootable, sizeof(uint32_t), crc);
     /* and the vfill residue of the 2nd sector (using crc32 as temp buffer
      * containing 0xffffffff content */
-    for (uint32_t i = 0; i < (SHR_SECTOR_SIZE - sizeof(uint32_t)) / 4; ++i) {
-        crc = crc32((uint8_t*)&tmp_fw.crc32, sizeof(uint32_t), crc);
+    for (uint32_t i = 0; i < (SHR_SECTOR_SIZE - sizeof(uint32_t)); ++i) {
+        crc = crc32((uint8_t*)&tmp_fw.crc32, sizeof(uint8_t), crc);
     }
     /* update the crc32 field with the calculated CRC */
     tmp_fw.crc32 = crc;
