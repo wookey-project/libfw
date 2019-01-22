@@ -62,7 +62,7 @@ typedef struct __packed {
     uint32_t chunksize;
     uint32_t crc32;
     uint8_t hash[SHA256_DIGEST_SIZE];
-    uint8_t  sig[EC_STRUCTURED_SIG_EXPORT_SIZE(EC_MAX_SIGLEN)];
+    uint8_t sig[EC_MAX_SIGLEN];
 } t_firmware_signature;
 
 

@@ -145,7 +145,8 @@ uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, c
         goto final_err;
     }
     uint32_t crc;
-    t_firmware_signature tmp_fw = { 0xff };
+    t_firmware_signature tmp_fw;
+    memset((uint8_t*)&tmp_fw, 0xff, sizeof(t_firmware_signature));
     uint32_t bootable = FW_BOOTABLE;
 
     /* TODO: fw should be written in 2 times (in RAM, to set the CRC32, and
@@ -167,11 +168,11 @@ uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, c
     tmp_fw.crc32 = 0xffffffff;
 
     /* set the signature header CRC32 (with the CRC32 field set at 0xffffffff) */
-    crc = crc32((uint8_t*)&tmp_fw, sizeof(t_firmware_signature) - SHA256_DIGEST_SIZE - EC_STRUCTURED_SIG_EXPORT_SIZE(EC_MAX_SIGLEN), 0xffffffff);
+    crc = crc32((uint8_t*)&tmp_fw, sizeof(t_firmware_signature) - SHA256_DIGEST_SIZE - EC_MAX_SIGLEN, 0xffffffff);
 
     crc = crc32((uint8_t*)tmp_fw.hash, SHA256_DIGEST_SIZE, crc);
     /* signature is not a part of the CRC, we use 0xff...ff instead */
-    for (uint32_t i = 0; i <  EC_STRUCTURED_SIG_EXPORT_SIZE(EC_MAX_SIGLEN); ++i) {
+    for (uint32_t i = 0; i < EC_MAX_SIGLEN; ++i) {
         crc = crc32((uint8_t*)&tmp_fw.crc32, sizeof(uint8_t), crc);
     }
     /* equivalent to calculcating CRC32 of 0xffff of 'fill' field of the header */
