@@ -99,7 +99,7 @@ initial_err:
     return ok;
 }
 
-uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig)
+uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, const uint8_t *hash)
 {
     uint8_t ret;
     int desc;
@@ -151,10 +151,13 @@ uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig)
     /* TODO: fw should be written in 2 times (in RAM, to set the CRC32, and
      * written to flash in atomic mode */
     tmp_fw.magic = dfu_header->magic;
+    tmp_fw.type = dfu_header->type;
     tmp_fw.version = dfu_header->version;
+    tmp_fw.len = dfu_header->len;
     tmp_fw.siglen = dfu_header->siglen;
     tmp_fw.chunksize = dfu_header->chunksize;
     memcpy((void*)tmp_fw.sig, sig, tmp_fw.siglen);
+    memcpy((void*)tmp_fw.hash, hash, SHA256_DIGEST_SIZE);
     //tmp_fw.bootable = FW_BOOTABLE;
 
     /* CRC32 field is not checked for CRC32. We use it as tmp buf to calculate

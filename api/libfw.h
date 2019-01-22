@@ -142,7 +142,7 @@ uint8_t fw_storage_write_buffer(physaddr_t dest, uint32_t *buffer, uint32_t size
 
 uint8_t fw_storage_finalize_access(void);
 
-uint8_t set_fw_header(firmware_header_t *dfu_header, uint8_t *sig);
+uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, const uint8_t *hash);
 
 uint8_t clear_other_header(void);
 
