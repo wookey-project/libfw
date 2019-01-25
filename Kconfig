@@ -6,9 +6,6 @@ config USR_LIB_FIRMWARE
   Firmware utility library, manipulating firmware image,
   checking cryptographic header, and abstracting their storage into
   the device's storage backend
-config USR_LIB_FIRMWARE_CFLAGS
-  string
-  default " -I../../libs/firmware/api " if USR_LIB_FIRMWARE
 
 if USR_LIB_DFU
 
