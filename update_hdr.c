@@ -193,7 +193,7 @@ uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, c
 
     printf("writing header singature :@%x\n", fw);
     fw_storage_write_buffer((physaddr_t)fw, (uint32_t*)&tmp_fw, sizeof(t_firmware_signature));
-    printf("writing header bootflag :@%x\n", &fw->bootable);
+    printf("writing header bootflag :@%x\n", (uint32_t)&fw->bootable);
     fw_storage_write_buffer((physaddr_t)&fw->bootable, (uint32_t*)&bootable, sizeof(uint32_t));
 
     flash_lock();
