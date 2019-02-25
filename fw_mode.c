@@ -26,6 +26,10 @@ void dump_states(void)
 }
 
 
+/*
+ * FIXME: this function should use secbool instead of standard C boolean
+ * to avoid fault injection.
+ */
 bool is_in_flip_mode(void)
 {
     if (&__is_flip == (void*)0xf0) {
@@ -34,6 +38,10 @@ bool is_in_flip_mode(void)
     return false;
 }
 
+/*
+ * FIXME: this function should use secbool instead of standard C boolean
+ * to avoid fault injection.
+ */
 bool is_in_flop_mode(void)
 {
     if (&__is_flop == (void*)0xf0) {
@@ -50,6 +58,11 @@ bool is_in_fw_mode(void)
     return false;
 }
 
+
+/*
+ * FIXME: this function should use secbool instead of standard C boolean
+ * to avoid fault injection.
+ */
 bool is_in_dfu_mode(void)
 {
     if (&__is_dfu == (void*)0xf0) {

@@ -75,8 +75,10 @@ uint32_t fw_get_current_version(firmware_version_field_t field)
     if (is_in_flip_mode()) {
         desc = flash_get_descriptor(FLIP_SHR);
     }
-    if (is_in_flop_mode()) {
+    else if (is_in_flop_mode()) {
         desc = flash_get_descriptor(FLOP_SHR);
+    } else {
+        goto err;
     }
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
@@ -86,9 +88,10 @@ uint32_t fw_get_current_version(firmware_version_field_t field)
 
     if (is_in_flip_mode()) {
         fw = &(shr_header->fw);
-    }
-    if (is_in_flop_mode()) {
+    } else if (is_in_flop_mode()) {
         fw = &(shr_header->fw);
+    } else {
+        goto err;
     }
 
     /* get back current fw info (read only) - no flash unlock */
@@ -124,6 +127,10 @@ uint32_t fw_get_current_version(firmware_version_field_t field)
     }
 #endif
     return field_value;
+err:
+    /* on error case, we consider that current version is the max possible,
+     * to avoid using fault injection for rollback attack */
+    return 0xffffffff;
 
 }
 
