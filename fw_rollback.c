@@ -70,7 +70,7 @@ uint32_t fw_get_current_version(firmware_version_field_t field)
     }
 
 
-#ifdef CONFIG_WOOKEY
+#if CONFIG_WOOKEY || CONFIG_WOOKEY2
     /* mapping device */
     if (is_in_flip_mode()) {
         desc = flash_get_descriptor(FLIP_SHR);
