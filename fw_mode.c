@@ -2,7 +2,8 @@
 #include "fw_mode.h"
 
 #include "api/types.h"
-#include "api/print.h"
+#include "api/stdio.h"
+#include "api/nostd.h"
 
 /* these variables are linker script symbols. This means that they
  * have *no value*. Their address stored in the symbol table is used

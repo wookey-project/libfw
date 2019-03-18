@@ -21,8 +21,10 @@
  *
  */
 #include "fw_header.h"
-#include "api/print.h"
+#include "api/stdio.h"
+#include "api/nostd.h"
 #include "api/string.h"
+#include "api/nostd.h"
 #include "api/regutils.h"
 
 void firmware_print_header(const firmware_header_t * header)
