@@ -25,7 +25,7 @@
 #include "api/nostd.h"
 #include "api/string.h"
 #include "api/nostd.h"
-#include "api/regutils.h"
+#include "api/arpa/inet.h"
 
 void firmware_print_header(const firmware_header_t * header)
 {
@@ -65,12 +65,12 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
 	/* Copy the header from the buffer */
 	memcpy(header, buffer, sizeof(firmware_header_t));
 	/* FIXME: define arch independent endianess management (to_device(xxx) instead of to_big/to_little */
-	header->siglen    = to_big32(header->siglen);
-	header->chunksize = to_big32(header->chunksize);
-	header->len       = to_big32(header->len);
-	header->magic     = to_big32(header->magic);
-	header->type      = to_big32(header->type);
-	header->version   = to_big32(header->version);
+	header->siglen    = htonl(header->siglen);
+	header->chunksize = htonl(header->chunksize);
+	header->len       = htonl(header->len);
+	header->magic     = htonl(header->magic);
+	header->type      = htonl(header->type);
+	header->version   = htonl(header->version);
     if (sig != NULL) {
         /* full header size */
         if(len < sizeof(firmware_header_t)+header->siglen) {
@@ -114,17 +114,17 @@ int firmware_header_to_raw(__in const firmware_header_t *header,
 
 	/* Now copy the fields with reversed endianness */
 	memcpy(buffer, header, sizeof(firmware_header_t));
-	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	*((uint32_t*)buffer) = htonl(*((uint32_t*)buffer));
 	buffer += 4;
-	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	*((uint32_t*)buffer) = htonl(*((uint32_t*)buffer));
 	buffer += 4;
-	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	*((uint32_t*)buffer) = htonl(*((uint32_t*)buffer));
 	buffer += 4;
-	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	*((uint32_t*)buffer) = htonl(*((uint32_t*)buffer));
 	buffer += 4;
-	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	*((uint32_t*)buffer) = htonl(*((uint32_t*)buffer));
 	buffer += 4;
-	*((uint32_t*)buffer) = to_big32(*((uint32_t*)buffer));
+	*((uint32_t*)buffer) = htonl(*((uint32_t*)buffer));
 
 	return 0;
 err:
