@@ -63,17 +63,6 @@ bool is_in_fw_mode(void);
 
 bool is_in_dfu_mode(void);
 
-/* Get the FLIP and FLOP base addresses */
-uint32_t firmware_get_flip_base_addr(void);
-
-uint32_t firmware_get_flop_base_addr(void);
-
-/* Get the FLIP and FLOP sizes */
-uint32_t firmware_get_flip_size(void);
-
-uint32_t firmware_get_flop_size(void);
-
-
 /***********************************************************
  * Firmware storage access (needs update privilege)
  ***********************************************************/
@@ -85,6 +74,17 @@ uint32_t firmware_get_flop_size(void);
  *
  * Other usage of libfirmware (see above) is not restricted.
  */
+
+/* Get the FLIP and FLOP base addresses */
+uint32_t firmware_get_flip_base_addr(void);
+
+uint32_t firmware_get_flop_base_addr(void);
+
+/* Get the FLIP and FLOP sizes */
+uint32_t firmware_get_flip_size(void);
+
+uint32_t firmware_get_flop_size(void);
+
 
 /*
  * About initialization
