@@ -45,12 +45,57 @@
 
 uint32_t crc32 (const unsigned char *buf, uint32_t len, uint32_t init);
 
-// FIXME: add hmac
+
+/***********************************************************
+ * Firmware current mode informational API
+ ***********************************************************/
+
+/*
+ * Current mode detection. These functions return the current mode, based on the
+ * linker scripts variables _is_flip, _is_flop, and so on. See application ldscript
+ * for more information.
+ */
+bool is_in_flip_mode(void);
+
+bool is_in_flop_mode(void);
+
+bool is_in_fw_mode(void);
+
+bool is_in_dfu_mode(void);
+
+/* Get the FLIP and FLOP base addresses */
+uint32_t firmware_get_flip_base_addr(void);
+
+uint32_t firmware_get_flop_base_addr(void);
+
+/* Get the FLIP and FLOP sizes */
+uint32_t firmware_get_flip_size(void);
+
+uint32_t firmware_get_flop_size(void);
 
 
 /***********************************************************
+ * Firmware storage access (needs update privilege)
+ ***********************************************************/
+
+/*
+ * All these functions are dedicated to the device updater application.
+ * This application *must* have the UPDATE permission to access the
+ * flash memory in write and update mode.
+ *
+ * Other usage of libfirmware (see above) is not restricted.
+ */
+
+/*
+ * About initialization
+ */
+uint8_t firmware_early_init(t_device_mapping *devmap);
+
+uint8_t firmware_init(void);
+
+/*
  * Firmware header manipulation functions
- **********************************************************/
+ */
 
 #define FW_IV_LEN 16
 #define FW_HMAC_LEN 32
@@ -101,52 +146,6 @@ bool firmware_is_partition_flip(__in const firmware_header_t *header);
 bool firmware_is_partition_flop(__in const firmware_header_t *header);
 
 /*
- * Current mode detection. These functions return the current mode, based on the
- * linker scripts variables _is_flip, _is_flop, and so on. See application ldscript
- * for more information.
- */
-bool is_in_flip_mode(void);
-
-bool is_in_flop_mode(void);
-
-bool is_in_fw_mode(void);
-
-bool is_in_dfu_mode(void);
-
-/* Get the FLIP and FLOP base addresses */
-uint32_t firmware_get_flip_base_addr(void);
-
-uint32_t firmware_get_flop_base_addr(void);
-
-/* Get the FLIP and FLOP sizes */
-uint32_t firmware_get_flip_size(void);
-
-uint32_t firmware_get_flop_size(void);
-
-
-/*
- * About initialization
- */
-uint8_t firmware_early_init(t_device_mapping *devmap);
-
-uint8_t firmware_init(void);
-
-/*
- * Storage management
- */
-uint8_t fw_storage_erase_bank(void);
-
-uint8_t fw_storage_prepare_access(void);
-
-uint8_t fw_storage_write_buffer(physaddr_t dest, uint32_t *buffer, uint32_t size);
-
-uint8_t fw_storage_finalize_access(void);
-
-uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, const uint8_t *hash);
-
-uint8_t clear_other_header(void);
-
-/*
  * About firmware versioning
  */
 
@@ -163,5 +162,23 @@ uint32_t fw_get_current_version(firmware_version_field_t field);
 bool fw_is_rollback(firmware_header_t *header);
 
 int fw_version_compare(uint32_t version1, uint32_t version2);
+
+
+
+/*
+ * Storage management (updating firmware)
+ */
+
+uint8_t fw_storage_erase_bank(void);
+
+uint8_t fw_storage_prepare_access(void);
+
+uint8_t fw_storage_write_buffer(physaddr_t dest, uint32_t *buffer, uint32_t size);
+
+uint8_t fw_storage_finalize_access(void);
+
+uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, const uint8_t *hash);
+
+uint8_t clear_other_header(void);
 
 #endif
