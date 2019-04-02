@@ -1,7 +1,7 @@
+#include "autoconf.h"
 #include "libfw.h"
 #include "libflash.h"
 #include "fw_storage.h"
-#include "fw_mode.h"
 #include "api/syscall.h"
 #include "api/stdio.h"
 #include "api/nostd.h"
@@ -64,10 +64,10 @@ uint32_t fw_get_current_version(firmware_version_field_t field)
     uint32_t field_value = 0;
     shr_vars_t *shr_header;
     if (is_in_flip_mode()) {
-        shr_header = (shr_vars_t*)FLASH_FLIP_SHR_ADDR;
+        shr_header = (shr_vars_t*)CONFIG_USR_LIB_FIRMWARE_FLIP_BOOTINFO_ADDR;
     }
     if (is_in_flop_mode()) {
-        shr_header = (shr_vars_t*)FLASH_FLOP_SHR_ADDR;
+        shr_header = (shr_vars_t*)CONFIG_USR_LIB_FIRMWARE_FLOP_BOOTINFO_ADDR;
     }
 
 

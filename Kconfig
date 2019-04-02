@@ -18,6 +18,48 @@ config USR_LIB_FIRWARE_SUPPORT_HW_HMAC
   Support for hardware HMAC IP to calculate the written firmware HMAC
   for post-download integrity check.
 
+config USR_LIB_FIRMWARE_FLIP_ADDR
+  hex "Flip bank firmware base address"
+  default 0x08020000
+  ---help---
+  Address of the flip bank firmware image base address. This address should
+  correspond to the address of the first byte of the firmware that need to
+  be written, not including the bootinfo or the bootloader sections
+
+config USR_LIB_FIRMWARE_FLOP_ADDR
+  hex "Flop bank firmware base address"
+  default 0x08120000
+  ---help---
+  Address of the flop bank firmware image base address. This address should
+  correspond to the address of the first byte of the firmware that need to
+  be written, not including the bootinfo or the bootloader sections
+
+config USR_LIB_FIRMWARE_FLIP_BOOTINFO_ADDR
+   hex "Flip bank bootinfo header base address"
+   default 0x08008000
+   ---help---
+   Address of the flip bank bootinfo header that will be parsed by the
+   bootloader at boot time. This header must be stored in a dedicated
+   flash sector as it is erased at upgrade time
+
+config USR_LIB_FIRMWARE_FLOP_BOOTINFO_ADDR
+   hex "Flop bank bootinfo header base address"
+   default 0x08108000
+   ---help---
+   Address of the flip bank bootinfo header that will be parsed by the
+   bootloader at boot time. This header must be stored in a dedicated
+   flash sector as it is erased at upgrade time
+
+config USR_LIB_FIRMWARE_BANK_SIZE
+   hex "bank image size"
+   default 0xe0000
+   ---help---
+   Size of a bank. A bank is equal to the firmware content size, not
+   including the bootinfo and the bootloader section. It contains the
+   overall upgradable contigous software content of a given bank and
+   should be equal to the firmware image size without its cryptographic
+   header
+
 endmenu
 
 endif

@@ -1,5 +1,5 @@
+#include "autoconf.h"
 #include "api/libfw.h"
-#include "fw_mode.h"
 
 #include "api/types.h"
 #include "api/stdio.h"
@@ -74,20 +74,20 @@ bool is_in_dfu_mode(void)
 
 uint32_t firmware_get_flip_base_addr(void)
 {
-    return FLASH_FLIP_ADDR;
+    return CONFIG_USR_LIB_FIRMWARE_FLIP_ADDR;
 }
 
 uint32_t firmware_get_flop_base_addr(void)
 {
-    return FLASH_FLOP_ADDR;
+    return CONFIG_USR_LIB_FIRMWARE_FLOP_ADDR;
 }
 
 uint32_t firmware_get_flip_size(void)
 {
-    return FLASH_BANK_SIZE;
+    return CONFIG_USR_LIB_FIRMWARE_BANK_SIZE;
 }
 
 uint32_t firmware_get_flop_size(void)
 {
-    return FLASH_BANK_SIZE;
+    return CONFIG_USR_LIB_FIRMWARE_BANK_SIZE;
 }

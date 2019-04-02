@@ -1,7 +1,7 @@
+#include "autoconf.h"
 #include "api/libfw.h"
 #include "api/types.h"
 #include "autoconf.h"
-#include "fw_mode.h"
 #include "shr.h"
 #include "libflash.h"
 #include "libhash.h"
@@ -21,10 +21,10 @@ uint8_t clear_other_header(void)
     uint8_t ok = 0;
     shr_vars_t *shr_header = 0;
     if (is_in_flip_mode()) {
-        shr_header = (shr_vars_t*)FLASH_FLOP_SHR_ADDR;
+        shr_header = (shr_vars_t*)CONFIG_USR_LIB_FIRMWARE_FLOP_BOOTINFO_ADDR;
     }
     if (is_in_flop_mode()) {
-        shr_header = (shr_vars_t*)FLASH_FLIP_SHR_ADDR;
+        shr_header = (shr_vars_t*)CONFIG_USR_LIB_FIRMWARE_FLIP_BOOTINFO_ADDR;
     }
 
     desc = flash_get_descriptor(CTRL2);
@@ -108,10 +108,10 @@ uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, c
     uint8_t ok = 0;
     shr_vars_t *shr_header = 0;
     if (is_in_flip_mode()) {
-        shr_header = (shr_vars_t*)FLASH_FLOP_SHR_ADDR;
+        shr_header = (shr_vars_t*)CONFIG_USR_LIB_FIRMWARE_FLOP_BOOTINFO_ADDR;
     }
     if (is_in_flop_mode()) {
-        shr_header = (shr_vars_t*)FLASH_FLIP_SHR_ADDR;
+        shr_header = (shr_vars_t*)CONFIG_USR_LIB_FIRMWARE_FLOP_BOOTINFO_ADDR;
     }
 
 
