@@ -84,10 +84,10 @@ uint32_t firmware_get_flop_base_addr(void)
 
 uint32_t firmware_get_flip_size(void)
 {
-    return FLASH_SIZE;
+    return FLASH_BANK_SIZE;
 }
 
 uint32_t firmware_get_flop_size(void)
 {
-    return FLASH_SIZE;
+    return FLASH_BANK_SIZE;
 }

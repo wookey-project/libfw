@@ -6,7 +6,7 @@
 #define FLASH_FLIP_ADDR 0x08020000
 #define FLASH_FLIP_SHR_ADDR  0x08008000
 #define FLASH_FLOP_SHR_ADDR  0x08108000
-#define FLASH_SIZE 0xe0000 // fw+dfu size (without SHR & bootloader)
+#define FLASH_BANK_SIZE 0xe0000 // firmware size (bank size, without SHR & bootloader)
 
 
 
