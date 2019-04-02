@@ -7,7 +7,7 @@
 #include "fw_storage.h"
 #include "api/syscall.h"
 
-#define FW_STORAGE_DEBUG 1
+#define FW_STORAGE_DEBUG 0
 
 uint8_t fw_storage_early_init(t_device_mapping *devmap)
 {
