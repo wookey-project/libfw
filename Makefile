@@ -36,7 +36,7 @@ TODEL_CLEAN += $(OBJ)
 # targets
 TODEL_DISTCLEAN += $(APP_BUILD_DIR)
 
-.PHONY: app
+.PHONY: app doc
 
 default: all
 
@@ -59,6 +59,9 @@ lib: $(APP_BUILD_DIR)/$(LIB_FULL_NAME)
 # App C sources files
 $(APP_BUILD_DIR)/%.o: %.c
 	$(call if_changed,cc_o_c)
+
+doc:
+	$(Q)$(MAKE) BUILDDIR=../$(APP_BUILD_DIR)/doc  -C doc html latexpdf
 
 # lib
 $(APP_BUILD_DIR)/$(LIB_FULL_NAME): $(OBJ)
