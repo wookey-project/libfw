@@ -163,3 +163,41 @@ To avoid any overwrite attempt associated to a corrupted firmware file, the bank
 
 Updating bootmnfo
 ^^^^^^^^^^^^^^^^^
+
+When the firmware is fully written and its integrity has been checked in comparison with the signature received from the cryptographic header, the bootinfo of the corresponding bank can be updated.
+
+The libfirmware handle the bootinfo header::
+
+   #include "libfw.h"
+
+   uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, const uint8_t *hash);
+
+This function generate a complete header structure at the begining of the header sector, which correspond to the address set in the USR_LIB_FIRMWARE_FL[IO]P_BOOTINFO_ADDR.
+To avoid any injection of content in the header sector, the *set_fw_header()* execute the following steps:
+
+   1. It erase the bootinfo sector*
+   2. It generate the haeder info in memory, and calculate a complete cheksum of the bootinfo sector, which will be fullfill with 0xff pattern after the header structure data. The CRC32 is calculated on the overall sector but the CRC32 field itself
+   3. It update the overall sector with the new content forged in memory
+
+Any attempt to reboot before the header is fully written make the CRC32 calculation by the bootloader invalid.
+
+The header also hold a SHA256 signature of the firmware bank, which will be checked by the bootloader at boot time to check the bank integrity at boot time
+
+.. hint::
+   The cryptographic and checksum information written by the libfirmware permit to validate both the integrity of the bootinfo header and the associated firmware bank at each boot
+
+
+Rollback protection
+^^^^^^^^^^^^^^^^^^^
+
+One of the basic attack on an upgradable device would be to load a previous, vulnerable, version of the firmware image in order to exploit a well-known vulnerability. The libfirmware provide an API to detect rollback attacks::
+
+   #include "libfw.h"
+
+   bool fw_is_rollback(firmware_header_t *header);
+   int  fw_version_compare(uint32_t version1, uint32_t version2);
+
+These functions permit to compare the current firmware version (which is stored in the firmware header) with the current firmware version.
+*fw_is_rollback()* return true if the update is an effective rollback (i.e. current version is greater that the proposed one).
+*fw_version_compare()* return an integer with is less than, equal or greater than 0 if version1 is respectively older, equal or newer than version2.
+

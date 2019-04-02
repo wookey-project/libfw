@@ -62,3 +62,26 @@ The libfirmware also handle the firmware storage backend, including the firmware
 .. warning::
    All the header related API is specific to the way firmware headers and bootloader header update are handled. This part of the libfirmware can be ported from one hardware to another, but is sticked to the way Wookey is handling its upgrade
 
+Manipulating the firmware storage backend requires to know precisely how the
+storage is structured. The libfirmware needs various informations:
+
+   * Each bank base address
+   * Each bootinfo base address
+   * The size of a bank
+
+There is no specific constraints on how the banks, the bootloader(s) and the bootinfo headers are located in the storage area, although:
+
+   1. Each bank must have its own bootinfo
+   2. Each bootinfo must be stored in a dedicated flash sector, as the sector is fully erased at haeder update time and the checksum is calculated on the overall sector size
+   3. Each bank must be contigous
+
+There is no constraints on the contiguity between the bootinfo sector and the bank sector(s), as there is no constrain on the bootloader position, as the bootloader is never acceded.
+
+.. warning::
+   Take a great care to properly separate each bank and each bank bootinfo information, to keep a correct resiliency between both banks
+
+All the requested informations (bank base address, bootinfo base address and bank size) is configured through the Kconfig mechanism of the libfirmware.
+
+.. caution::
+   The libfirmware configuration must be done through the overall project configuration system (e.g. using the tataouine SDK) in order to correctly generate autoconf.h header file
+

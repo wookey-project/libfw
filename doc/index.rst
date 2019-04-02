@@ -13,8 +13,8 @@ Its goal is to handle two separated usage:
    :name: mastertoc
    :maxdepth: 2
 
-   About the DFU protocol <about>
-   The DFU API <api>
+   About the firmware toolkit <about>
+   The firmware API <api>
    FAQ <faq>
 
 
