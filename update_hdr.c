@@ -111,7 +111,7 @@ uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, c
         shr_header = (shr_vars_t*)CONFIG_USR_LIB_FIRMWARE_FLOP_BOOTINFO_ADDR;
     }
     if (is_in_flop_mode()) {
-        shr_header = (shr_vars_t*)CONFIG_USR_LIB_FIRMWARE_FLOP_BOOTINFO_ADDR;
+        shr_header = (shr_vars_t*)CONFIG_USR_LIB_FIRMWARE_FLIP_BOOTINFO_ADDR;
     }
 
 
