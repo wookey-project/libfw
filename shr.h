@@ -24,7 +24,7 @@
 #define _SHARED_H
 
 #include "autoconf.h"
-#include "api/types.h"
+#include "libc/types.h"
 #include "libsig.h"
 
 #ifndef CONFIG_FIRMWARE_DUALBANK

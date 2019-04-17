@@ -24,7 +24,7 @@
 #define LIBFW_H_
 
 #include "autoconf.h"
-#include "api/types.h"
+#include "libc/types.h"
 #include "libflash.h"
 
 #define LIBFW_DEBUG 0

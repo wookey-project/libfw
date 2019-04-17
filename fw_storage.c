@@ -1,11 +1,11 @@
 #include "autoconf.h"
 #include "api/libfw.h"
-#include "api/types.h"
-#include "api/stdio.h"
-#include "api/nostd.h"
+#include "libc/types.h"
+#include "libc/stdio.h"
+#include "libc/nostd.h"
 #include "libflash.h"
 #include "fw_storage.h"
-#include "api/syscall.h"
+#include "libc/syscall.h"
 
 #define FW_STORAGE_DEBUG 0
 

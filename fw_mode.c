@@ -1,9 +1,9 @@
 #include "autoconf.h"
 #include "api/libfw.h"
 
-#include "api/types.h"
-#include "api/stdio.h"
-#include "api/nostd.h"
+#include "libc/types.h"
+#include "libc/stdio.h"
+#include "libc/nostd.h"
 
 /* these variables are linker script symbols. This means that they
  * have *no value*. Their address stored in the symbol table is used

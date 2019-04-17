@@ -23,7 +23,7 @@
 #ifndef CRC32_H_
 #define CRC32_H_
 
-#include "api/types.h"
+#include "libc/types.h"
 #include "api/libfw.h"
 
 /*
