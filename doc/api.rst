@@ -1,5 +1,6 @@
-The libFirmware API
--------------------
+
+API
+---
 
 The Run mode API
 """"""""""""""""
@@ -41,9 +42,13 @@ The firmware image manipulation is composed of the following sets:
 Manipulating firmware header
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The firmware header is created at the begining of the firmware file, and is checked by the security monitor. In Wookey, this task is made in association with the Secure Element in order to handle cryptographic content of the header.
+The firmware header is created at the begining of the firmware file, and is
+checked by the security monitor. In Wookey, this task is made in association
+with the Secure Element in order to handle cryptographic content of the header.
 
-Although, as the header comes from an external host through a USB layer, the header has to be translated in the device endianess, and converted from a raw buffer to a real effective header.
+Although, as the header comes from an external host through a USB layer, the
+header has to be translated in the device endianess, and converted from a raw
+buffer to a real effective header.
 
 This is done using the following API::
 
@@ -55,13 +60,15 @@ This is done using the following API::
                              __out firmware_header_t *header,
                              __out uint8_t           *sig);
 
-__out parameters are updated by the firmware_parse_header() function, based on the input buffer given. The signature is extracted from the input buffer in
+``__out`` parameters are updated by the firmware_parse_header() function, based on
+the input buffer given. The signature is extracted from the input buffer in
 order to be used in future signature check of the header.
 
 .. warning::
    parameters must be allocated content, as this function doesn't allocate anything
 
-Translating an existing formated header into raw data can also be done using the following API::
+Translating an existing formated header into raw data can also be done using
+the following API::
 
    #include "libfw.h"
 
@@ -70,7 +77,8 @@ Translating an existing formated header into raw data can also be done using the
                               __out  const uint32_t     len);
 
 
-When the header parsing fails, it is possible to dump on the serial line the haeder content, using the following API::
+When the header parsing fails, it is possible to dump on the serial line the
+haeder content, using the following API::
 
    #include "libfw.h"
 
@@ -80,9 +88,11 @@ When the header parsing fails, it is possible to dump on the serial line the hae
    This function is useless in production mode, as the serial line is deactivated. This function is for debug purpose only
 
 
-By now, firmware files are bank-specific (i.e. a firmware file is specific to flip or to flop). This restriction is due to various slotting constraints.
+By now, firmware files are bank-specific (i.e. a firmware file is specific to
+flip or to flop). This restriction is due to various slotting constraints.
 
-As a consequence, the libfirmware provice high level API to check the currently received firmware destination bank::
+As a consequence, the libfirmware provice high level API to check the currently
+received firmware destination bank::
 
    #include "libfw.h"
 
@@ -90,7 +100,10 @@ As a consequence, the libfirmware provice high level API to check the currently 
    bool firmware_is_partition_flop(__in const firmware_header_t *header);
 
 .. hint::
-   An invalid bank (i.e. FLIP while in flip mode or FLOP while in flop mode) should results in refusing the firmware. In Wookey, the DFU handling allows to refuse an authenticated but invalid bank firmware and to rollback for another firmware reception without rebooting the device
+   An invalid bank (i.e. FLIP while in flip mode or FLOP while in flop mode)
+   should results in refusing the firmware. In Wookey, the DFU handling allows to
+   refuse an authenticated but invalid bank firmware and to rollback for another
+   firmware reception without rebooting the device
 
 
 

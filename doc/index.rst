@@ -1,6 +1,8 @@
 The Firmware library
 ====================
 
+.. contents::
+
 The firmware library is a toolkit for manipulating firmware-related informations and
 data.
 Its goal is to handle two separated usage:
@@ -8,13 +10,7 @@ Its goal is to handle two separated usage:
    1. Handling run state (detecting firmware mode and bank being executed)
    2. Manipulating firmware files and associated metainformations (header, CRC...)
 
-
-.. toctree::
-   :caption: Table of contents
-   :name: mastertoc
-   :maxdepth: 2
-
-   Firmware principle <about>
-   libFirmware API <api>
-   FAQ <faq>
+.. include:: about.rst
+.. include:: api.rst
+.. include:: faq.rst
 

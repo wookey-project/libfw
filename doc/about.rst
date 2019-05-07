@@ -1,5 +1,6 @@
-About the libfirmware usages
-----------------------------
+
+Overview
+--------
 
 Run mode usage
 """"""""""""""
