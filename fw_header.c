@@ -73,7 +73,7 @@ int firmware_parse_header(__in  const uint8_t     *buffer,
 	header->version   = htonl(header->version);
     if (sig != NULL) {
         /* full header size */
-        if(len < sizeof(firmware_header_t)+header->siglen) {
+        if(len < (sizeof(firmware_header_t)+header->siglen)) {
             /* The provided buffer is too small! */
             goto err;
         }
@@ -152,7 +152,7 @@ bool firmware_is_partition_flop(__in const firmware_header_t *header)
 	if(header == NULL){
 		goto err;
 	}
-	if(header->type == FLOP){
+	if(header->type == PART_FLOP){
 		return true;
 	}
 	else{
