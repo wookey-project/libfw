@@ -1,6 +1,9 @@
 The Firmware library
 ====================
 
+.. highlight:: c
+
+
 .. contents::
 
 The firmware library is a toolkit for manipulating firmware-related informations and

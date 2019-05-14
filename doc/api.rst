@@ -1,5 +1,8 @@
 
 API
+
+.. highlight:: c
+
 ---
 
 The Run mode API
