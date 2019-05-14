@@ -1,9 +1,9 @@
 
 API
+---
 
 .. highlight:: c
 
----
 
 The Run mode API
 """"""""""""""""
@@ -176,7 +176,7 @@ To avoid any overwrite attempt associated to a corrupted firmware file, the bank
 
 
 
-Updating bootmnfo
+Updating bootinfo
 ^^^^^^^^^^^^^^^^^
 
 When the firmware is fully written and its integrity has been checked in comparison with the signature received from the cryptographic header, the bootinfo of the corresponding bank can be updated.
