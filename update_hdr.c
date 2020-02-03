@@ -100,6 +100,16 @@ initial_err:
     return ok;
 }
 
+
+#if __GNUC__ > 8
+/*
+ * INFO: Here, we cast a packed struct address in a uint32_t pointer for memset().
+ * This is *not* an error.
+ * Gcc 9 warning is a false positive.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
+#endif
 uint8_t set_fw_header(const firmware_header_t *dfu_header, const uint8_t *sig, const uint8_t *hash)
 {
     uint8_t ret;
@@ -228,3 +238,7 @@ initial_err:
 
     return ok;
 }
+#if __GNUC__ > 8
+#pragma GCC diagnostic pop
+#endif
+
