@@ -173,6 +173,8 @@ uint8_t fw_storage_erase_bank(void);
 
 uint8_t fw_storage_prepare_access(void);
 
+uint8_t fw_storage_release_access(void);
+
 uint8_t fw_storage_write_buffer(physaddr_t dest, uint32_t *buffer, uint32_t size);
 
 uint8_t fw_storage_finalize_access(void);
