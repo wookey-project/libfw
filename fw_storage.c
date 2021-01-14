@@ -47,7 +47,7 @@ uint8_t fw_storage_erase_bank(void)
     desc = flash_get_descriptor(CTRL);
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
-        printf("enable to map flash-ctrl device\n");
+        printf("unable to map flash-ctrl device\n");
         return 1;
     }
 
@@ -86,7 +86,7 @@ uint8_t fw_storage_erase_bank(void)
     /* unmap flash-ctrl */
     ret = sys_cfg(CFG_DEV_UNMAP, desc);
     if (ret != SYS_E_DONE) {
-        printf("enable to unmap flash-ctrl device\n");
+        printf("unable to unmap flash-ctrl device\n");
         return 1;
     }
 
@@ -108,7 +108,7 @@ uint8_t fw_storage_prepare_access(void)
 #endif
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
-        printf("enable to map flash-ctrl device\n");
+        printf("unable to map flash-ctrl device\n");
         return 1;
     }
 
@@ -124,17 +124,63 @@ uint8_t fw_storage_prepare_access(void)
     /* mounting flash memory area */
     desc = flash_get_descriptor(desc_id);
 #if FW_STORAGE_DEBUG
-    printf("mappint flash-ctrl (desc: %d)\n", desc);
+    printf("mapping flash partition (desc: %d)\n", desc);
 #endif
 
     ret = sys_cfg(CFG_DEV_MAP, desc);
     if (ret != SYS_E_DONE) {
-        printf("enable to map flash-ctrl device\n");
+        printf("unable to map flash partition device\n");
         return 1;
     }
 
     /* unlocking flash */
     flash_unlock();
+    return 0;
+}
+
+uint8_t fw_storage_release_access(void)
+{
+    uint8_t ret;
+    int desc;
+    uint8_t  desc_id = 0;
+
+    /* unmapping FLIP or FLOP */
+    if (is_in_flip_mode()) {
+        desc_id = FLOP;
+
+    } else if (is_in_flop_mode()) {
+        desc_id = FLIP;
+    } else {
+        printf("neither in flip or flop mode !\n");
+        return 1;
+    }
+
+    desc = flash_get_descriptor(desc_id);
+#if FW_STORAGE_DEBUG
+    printf("unmapping flash partition (desc: %d)\n", desc);
+#endif
+
+    ret = sys_cfg(CFG_DEV_UNMAP, desc);
+    if (ret != SYS_E_DONE) {
+        printf("unable to unmap flash partition device\n");
+        return 1;
+    }
+
+    /* unmapping flash-ctrl */
+    desc = flash_get_descriptor(CTRL);
+
+    /* lock flash CR */
+    flash_lock();
+
+#if FW_STORAGE_DEBUG
+    printf("Unmapping flash-ctrl (desc: %d)\n", desc);
+#endif
+    ret = sys_cfg(CFG_DEV_UNMAP, desc);
+    if (ret != SYS_E_DONE) {
+        printf("unable to unmap flash-ctrl device\n");
+        return 1;
+    }
+
     return 0;
 }
 
@@ -161,7 +207,7 @@ uint8_t fw_storage_finalize_access(void)
 
     ret = sys_cfg(CFG_DEV_UNMAP, desc);
     if (ret != SYS_E_DONE) {
-        printf("enable to unmap flash memory device\n");
+        printf("unable to unmap flash memory device\n");
         return 1;
     }
 
@@ -170,7 +216,7 @@ uint8_t fw_storage_finalize_access(void)
 #endif
     ret = sys_cfg(CFG_DEV_RELEASE, desc);
     if (ret != SYS_E_DONE) {
-        printf("enable to release flash memory device\n");
+        printf("unable to release flash memory device\n");
         return 1;
     }
 
@@ -185,7 +231,7 @@ uint8_t fw_storage_finalize_access(void)
 #endif
     ret = sys_cfg(CFG_DEV_UNMAP, desc);
     if (ret != SYS_E_DONE) {
-        printf("enable to unmap flash-ctrl device\n");
+        printf("unable to unmap flash-ctrl device\n");
         return 1;
     }
 
@@ -194,7 +240,7 @@ uint8_t fw_storage_finalize_access(void)
 #endif
     ret = sys_cfg(CFG_DEV_RELEASE, desc);
     if (ret != SYS_E_DONE) {
-        printf("enable to release flash-ctrl device\n");
+        printf("unable to release flash-ctrl device\n");
         return 1;
     }
 
