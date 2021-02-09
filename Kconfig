@@ -7,7 +7,7 @@ config USR_LIB_FIRMWARE
   checking cryptographic header, and abstracting their storage into
   the device's storage backend
 
-if USR_LIB_DFU
+if USR_LIB_FIRMWARE
 
 menu "Firmware-Related Features"
 
